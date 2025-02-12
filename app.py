@@ -4,6 +4,7 @@ from pathlib import Path
 
 from aiohttp import web
 from azure.core.credentials import AzureKeyCredential
+from call_handlers import CallHandler
 from dotenv import load_dotenv
 from ragtools import attach_rag_tools
 from rtmt import RTMiddleTier
@@ -22,6 +23,13 @@ async def create_app():
     
     app = web.Application()
 
+    # Initialize call handler
+    call_handler = CallHandler()
+
+    # Add routes for call handling
+    app.router.add_post('/api/incomingCall', call_handler.handle_incoming_call)
+    app.router.add_post('/api/callbacks/{context_id}', call_handler.handle_callbacks)
+    
     rtmt = RTMiddleTier(
         credentials=llm_credential,
         endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
